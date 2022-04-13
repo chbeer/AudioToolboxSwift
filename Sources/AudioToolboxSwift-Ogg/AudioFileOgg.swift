@@ -39,14 +39,18 @@ public class AudioQueueOutputSourceOgg {
     deinit {
         ov_clear(&oggVorbisFile)
     }
+    
+    var duration: TimeInterval {
+        return TimeInterval(ov_time_total(&oggVorbisFile, -1))
+    }
 }
 
 extension AudioQueueOutputSourceOgg: AudioQueueOutputSource {
 
     public func readData(buffer: AudioQueueBufferRef) throws -> Bool {
-        var bigEndian: Int32 = 0
-        var wordSize = Const.vorbisWordSize
-        var signedSamples: Int32 = 1
+        let bigEndian: Int32 = 0
+        let wordSize = Const.vorbisWordSize
+        let signedSamples: Int32 = 1
         var currentSection: Int32 = -1
         
         /* See: http://xiph.org/vorbis/doc/vorbisfile/ov_read.html */
@@ -55,6 +59,7 @@ extension AudioQueueOutputSourceOgg: AudioQueueOutputSource {
         //var readBuf = [CChar](repeating: 0, count: Int(buffer.pointee.mAudioDataBytesCapacity))
         var readBuf = buffer.pointee.mAudioData.assumingMemoryBound(to: CChar.self)
         repeat {
+            readBuf = readBuf.advanced(by: nBytesRead)
             nBytesRead = ov_read(&oggVorbisFile,
                                  readBuf,
                                  Int32(Int(buffer.pointee.mAudioDataBytesCapacity - nTotalBytesRead)),

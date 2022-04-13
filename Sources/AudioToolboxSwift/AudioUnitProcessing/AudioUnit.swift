@@ -8,6 +8,10 @@
 import Foundation
 import AudioToolbox
 
+protocol AudioUnitParameter {
+    var rawValue: AudioUnitParameterID { get }
+}
+
 public class AudioUnit {
     
     public enum Property: AudioUnitPropertyID {
@@ -69,7 +73,7 @@ public class AudioUnit {
         case audioUnitMIDIProtocol = 64
         case hostMIDIProtocol = 65
     }
-    enum Scope: AudioUnitScope {
+    public enum Scope {
         case global
         case input
         case output
@@ -78,20 +82,6 @@ public class AudioUnit {
         case note
         case layer
         case layerItem
-        
-        var rawValue: UInt32 {
-            switch self {
-            case .global:    return kAudioUnitScope_Global
-            case .input:     return kAudioUnitScope_Input
-            case .output:    return kAudioUnitScope_Output
-            case .group:     return kAudioUnitScope_Group
-            case .part:      return kAudioUnitScope_Part
-            case .note:      return kAudioUnitScope_Note
-            case .layer:     return kAudioUnitScope_Layer
-            case .layerItem: return kAudioUnitScope_LayerItem
-            }
-
-        }
     }
     
     let audioComponentDescription: AudioComponentDescription
@@ -113,16 +103,63 @@ public class AudioUnit {
         try auAssert(AUGraphNodeInfo(graph.graph!, node, nil, &unit))
     }
     
-    func setProperty<T>(_ property: Property, scope: Scope, element: UInt32 = 0, value: T) throws {
+    // MARK: - Property Management
+    
+    func getProperty<T>(_ property: Property, scope: Scope, element: Int = 0, default value: [T]) throws -> [T] {
+        guard let unit = unit else { throw AudioUnitError.unitUnitialized }
+        var size: UInt32 = UInt32(MemoryLayout<T>.size * value.count)
+        var data: [T] = value
+        try aqAssert(AudioUnitGetProperty(unit,
+                                          property.rawValue,
+                                          scope.rawValue,
+                                          AudioUnitElement(element),
+                                          &data,
+                                          &size))
+        return data
+    }
+    func getProperty<T>(_ property: Property, scope: Scope, element: Int = 0, default value: T) throws -> T {
+        guard let unit = unit else { throw AudioUnitError.unitUnitialized }
+        var size: UInt32 = UInt32(MemoryLayout<T>.size)
+        var data: T = value
+        try aqAssert(AudioUnitGetProperty(unit,
+                                          property.rawValue,
+                                          scope.rawValue,
+                                          AudioUnitElement(element),
+                                          &data,
+                                          &size))
+        return data
+    }
+    
+    func setProperty<T>(_ property: Property, scope: Scope, element: Int = 0, value: T) throws {
         guard let unit = unit else { throw AudioUnitError.unitUnitialized }
         var value: T = value
-        try auAssert(AudioUnitSetProperty(
-            unit,
-            property.rawValue,
-            scope.rawValue,
-            element,
-            &value,
-            UInt32(MemoryLayout<T>.size)
+        try auAssert(AudioUnitSetProperty(unit,
+                                          property.rawValue,
+                                          scope.rawValue,
+                                          AudioUnitElement(element),
+                                          &value,
+                                          UInt32(MemoryLayout<T>.size)
         ))
+    }
+    func setProperty<T>(_ property: Property, scope: Scope, element: Int = 0, value: [T]) throws {
+        guard let unit = unit else { throw AudioUnitError.unitUnitialized }
+        var value = value
+        try auAssert(AudioUnitSetProperty(unit,
+                                          property.rawValue,
+                                          scope.rawValue,
+                                          AudioUnitElement(element),
+                                          &value,
+                                          UInt32(MemoryLayout<T>.size * value.count)))
+    }
+    
+    func getParameter(_ parameter: AudioUnitParameter, scope: Scope, element: Int = 0) throws -> AudioUnitParameterValue {
+        guard let unit = unit else { throw AudioUnitError.unitUnitialized }
+        var value: AudioUnitParameterValue = 0
+        try aqAssert(AudioUnitGetParameter(unit, parameter.rawValue, scope.rawValue, AudioUnitElement(element), &value))
+        return value
+    }
+    func setParameter(_ parameter: AudioUnitParameter, scope: Scope, element: Int = 0, value: AudioUnitParameterValue) throws {
+        guard let unit = unit else { throw AudioUnitError.unitUnitialized }
+        try aqAssert(AudioUnitSetParameter(unit, parameter.rawValue, scope.rawValue, AudioUnitElement(element), value, 0))
     }
 }

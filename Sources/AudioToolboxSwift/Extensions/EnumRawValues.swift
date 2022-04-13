@@ -262,3 +262,19 @@ extension AudioQueue.Property {
     }
 }
 
+// MARK: - AudioUnit
+
+extension AudioUnit.Scope {
+    var rawValue: UInt32 {
+        switch self {
+        case .global:    return kAudioUnitScope_Global
+        case .input:     return kAudioUnitScope_Input
+        case .output:    return kAudioUnitScope_Output
+        case .group:     return kAudioUnitScope_Group
+        case .part:      return kAudioUnitScope_Part
+        case .note:      return kAudioUnitScope_Note
+        case .layer:     return kAudioUnitScope_Layer
+        case .layerItem: return kAudioUnitScope_LayerItem
+        }
+    }
+}

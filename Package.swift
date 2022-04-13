@@ -16,6 +16,9 @@ let package = Package(
         .library(
             name: "AudioToolboxSwift-Ogg",
             targets: ["AudioToolboxSwift-Ogg"]),
+        .library(
+            name: "AVFAudio-Ogg",
+            targets: ["AVFAudio-Ogg"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -35,6 +38,19 @@ let package = Package(
                 .linkedFramework("vorbis"),
             ]
         ),
+        .target(
+            name: "AVFAudio-Ogg",
+            dependencies: ["ogg", "vorbis", "AudioToolboxSwift-Ogg"],
+            linkerSettings: [
+                .linkedFramework("ogg"),
+                .linkedFramework("vorbis"),
+            ]
+        ),
+        
+        .target(
+            name: "OggVorbisC"
+        ),
+        
         .testTarget(
             name: "AudioToolboxSwiftTests",
             dependencies: ["AudioToolboxSwift"]),

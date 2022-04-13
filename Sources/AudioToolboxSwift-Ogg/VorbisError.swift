@@ -8,7 +8,7 @@
 import Foundation
 import vorbis
 
-enum VorbisError: Error {
+public enum VorbisError: Error {
     case `false`
     case eof
     case hole
@@ -27,7 +27,7 @@ enum VorbisError: Error {
     
     case unknown(Int32)
 
-    init(status: Int32) {
+    public init(status: Int32) {
         switch status {
         case OV_FALSE: self = .false
         case OV_EOF: self = .eof
@@ -49,6 +49,6 @@ enum VorbisError: Error {
     }
 }
 
-func ovAssert(_ status: Int32) throws {
+public func ovAssert(_ status: Int32) throws {
     guard status == 0 else { throw VorbisError(status: status) }
 }

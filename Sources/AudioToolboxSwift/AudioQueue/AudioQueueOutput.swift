@@ -24,8 +24,8 @@ public class AudioQueueOutput: AudioQueue {
     var isDone: Bool = false
 
     public init(format: AudioStreamBasicDescription,
-         dispatchQueue: DispatchQueue,
-         callback: @escaping AudioQueueOutputCallbackBlock) throws {
+                dispatchQueue: DispatchQueue,
+                callback: @escaping AudioQueueOutputCallbackBlock) throws {
         // inFlags: Reserved for future use. Pass 0.
         let flags: UInt32 = 0
         var format = format
@@ -129,7 +129,8 @@ public class AudioQueueOutput: AudioQueue {
         packetPosition = 0
         
         try prepareBuffers(count: numberOfBuffers, size: bufferSize,
-                           callback: AudioQueueOutput.audioSourceCallback, userData: userDataRef)
+                           callback: AudioQueueOutput.audioSourceCallback,
+                           userData: userDataRef)
     }
     
     // MARK: -
