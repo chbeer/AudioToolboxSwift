@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  AudioUnitOutput.swift
+//
 //
 //  Created by Christian Beer on 20.11.21.
 //
@@ -10,7 +10,7 @@ import AudioToolbox
 
 public class AudioUnitOutput: AudioUnit {
     
-    public init(subType: AudioComponentDescription.SubType = .remoteIO) {
+    public init(subType: AudioComponentDescription.SubType) {
         super.init(audioComponentDescription: .init(
             type: .output,
             subType: subType,
